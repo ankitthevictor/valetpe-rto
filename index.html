@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ValetPe – RTO & Refund Profit Leak Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 1.1rem;
+      margin: 24px 0 8px;
+      color: #cbd5f5;
+    }
+    p { font-size: 0.9rem; color: #9ca3af; margin: 4px 0 10px; }
+    .card {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 16px;
+      padding: 16px 14px;
+      margin-top: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.7);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 800px) {
+      .grid-2 {
+        grid-template-columns: 1.3fr 1fr;
+      }
+      .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    label {
+      font-size: 0.8rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .default-chip {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      background: rgba(30, 64, 175, 0.35);
+      border-radius: 999px;
+      padding: 4px 8px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #7dd3fc;
+      box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.5);
+    }
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+    }
+    button {
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #06b6d4);
+      color: #0b1120;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    button:hover {
+      filter: brightness(1.05);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.25);
+      color: #a5f3fc;
+    }
+    .metric {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .metric-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    .badge {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.25);
+      color: #bfdbfe;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    small { font-size: 0.7rem; color: #9ca3af; }
+    .muted { color: #6b7280; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>ValetPe – RTO & Refund Profit Leak Calculator</h1>
+    <p>Pick your category, tweak a few numbers, and see how much profit you’re leaking via COD RTO + refunds.</p>
+
+    <div class="card">
+      <div class="grid grid-2">
+        <div>
+          <h2>1. Category & volume</h2>
+          <div class="field-row">
+            <div>
+              <label>Category</label>
+              <select id="categorySelect">
+                <option value="beauty">Beauty & Personal Care</option>
+                <option value="fashion">Fashion / Apparel / Footwear</option>
+                <option value="health">Health & Wellness / Nutra</option>
+                <option value="electronics">Small Electronics / Gadgets</option>
+                <option value="home">Home & Furnishings / Decor</option>
+              </select>
+              <small class="muted">Defaults auto-fill per category. You can override any value.</small>
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Total orders per month</label>
+              <div class="default-chip" id="default-orders"></div>
+            </div>
+            <div>
+              <input type="number" id="orders" placeholder="e.g. 5000" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Average Order Value (₹)</label>
+              <div class="default-chip" id="default-aov"></div>
+            </div>
+            <div>
+              <input type="number" id="aov" placeholder="e.g. 1600" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>% COD orders</label>
+              <div class="default-chip" id="default-cod"></div>
+            </div>
+            <div>
+              <input type="number" id="codPct" placeholder="e.g. 55" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2>2. RTO & refund behaviour</h2>
+          <div class="field-row">
+            <div>
+              <label>% RTO on COD orders</label>
+              <div class="default-chip" id="default-codRto"></div>
+            </div>
+            <div>
+              <input type="number" id="codRtoPct" placeholder="e.g. 35" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>% refunds on prepaid orders</label>
+              <div class="default-chip" id="default-prepaidRefund"></div>
+            </div>
+            <div>
+              <input type="number" id="prepaidRefundPct" placeholder="e.g. 6" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Target % reduction in COD RTO with ValetPe</label>
+              <div class="default-chip" id="default-targetRto"></div>
+            </div>
+            <div>
+              <input type="number" id="targetRtoReductionPct" placeholder="e.g. 20" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Costs, margins & salvage</h2>
+      <div class="grid grid-2">
+        <div>
+          <div class="field-row">
+            <div>
+              <label>Forward shipping cost per order (₹)</label>
+              <div class="default-chip" id="default-forward"></div>
+            </div>
+            <div>
+              <input type="number" id="forwardShip" placeholder="e.g. 75" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Reverse shipping cost per RTO/return (₹)</label>
+              <div class="default-chip" id="default-reverse"></div>
+            </div>
+            <div>
+              <input type="number" id="reverseShip" placeholder="e.g. 95" />
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="field-row">
+            <div>
+              <label>Gross margin % on AOV</label>
+              <div class="default-chip" id="default-gm"></div>
+            </div>
+            <div>
+              <input type="number" id="gmPct" placeholder="e.g. 50" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>% product value recovered on returns (salvage)</label>
+              <div class="default-chip" id="default-salvage"></div>
+            </div>
+            <div>
+              <input type="number" id="salvagePct" placeholder="e.g. 50" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="calcBtn">Calculate profit leak</button>
+      <div class="muted">Percent inputs should be entered like <b>35</b> = 35%, not 0.35.</div>
+    </div>
+
+    <div class="card">
+      <h2>4. Output – how much are you leaking?</h2>
+      <div class="grid grid-3">
+        <div>
+          <div class="metric" id="monthlyLeak">₹0</div>
+          <div class="metric-label">Total monthly profit leak (RTO + refunds)</div>
+          <span class="badge" id="monthlyLeakPct">0% of revenue</span>
+        </div>
+        <div>
+          <div class="metric" id="annualLeak">₹0</div>
+          <div class="metric-label">Total annual profit leak (RTO + refunds)</div>
+          <span class="badge" id="annualLeakPct">0% of revenue</span>
+        </div>
+        <div>
+          <div class="metric" id="annualSaving">₹0</div>
+          <div class="metric-label">Annual savings if COD RTO reduced by target %</div>
+          <span class="badge" id="targetLabel">Assuming 0% reduction</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:22px;">5. Quick breakdown</h2>
+      <div class="grid grid-3">
+        <div>
+          <div class="metric" id="codRtoLoss">₹0</div>
+          <div class="metric-label">Annual loss – COD RTO</div>
+        </div>
+        <div>
+          <div class="metric" id="prepaidLoss">₹0</div>
+          <div class="metric-label">Annual loss – prepaid refunds</div>
+        </div>
+        <div>
+          <div class="metric" id="revLabel">₹0</div>
+          <div class="metric-label">Annual revenue (for reference)</div>
+        </div>
+      </div>
+
+      <p style="margin-top:18px;">
+        <span class="pill">
+          💡 Tip
+          <span>Share a screenshot of this section with ValetPe to get a deeper teardown.</span>
+        </span>
+      </p>
+    </div>
+
+    <p class="muted" style="margin-top: 16px;">
+      This is an approximate model based on typical India D2C benchmarks. Real numbers will vary by brand, policies and courier contracts.
+    </p>
+  </div>
+
+  <script>
+    // Category defaults (midpoints from your benchmark ranges)
+    const defaults = {
+      beauty: {
+        name: "Beauty & Personal Care",
+        orders: 5000,
+        aov: 750,
+        codPct: 50,
+        codRtoPct: 30,
+        prepaidRefundPct: 3,
+        forwardShip: 60,
+        reverseShip: 75,
+        gmPct: 70,
+        salvagePct: 10,
+        targetRtoReductionPct: 20
+      },
+      fashion: {
+        name: "Fashion / Apparel / Footwear",
+        orders: 5000,
+        aov: 1600,
+        codPct: 55,
+        codRtoPct: 35,
+        prepaidRefundPct: 6,
+        forwardShip: 75,
+        reverseShip: 95,
+        gmPct: 50,
+        salvagePct: 50,
+        targetRtoReductionPct: 20
+      },
+      health: {
+        name: "Health & Wellness / Nutra",
+        orders: 5000,
+        aov: 1100,
+        codPct: 40,
+        codRtoPct: 23,
+        prepaidRefundPct: 3.5,
+        forwardShip: 65,
+        reverseShip: 85,
+        gmPct: 50,
+        salvagePct: 40,
+        targetRtoReductionPct: 18
+      },
+      electronics: {
+        name: "Small Electronics / Gadgets",
+        orders: 5000,
+        aov: 2200,
+        codPct: 35,
+        codRtoPct: 16,
+        prepaidRefundPct: 2,
+        forwardShip: 80,
+        reverseShip: 100,
+        gmPct: 30,
+        salvagePct: 70,
+        targetRtoReductionPct: 15
+      },
+      home: {
+        name: "Home & Furnishings / Decor",
+        orders: 5000,
+        aov: 1500,
+        codPct: 50,
+        codRtoPct: 27,
+        prepaidRefundPct: 4.5,
+        forwardShip: 110,
+        reverseShip: 140,
+        gmPct: 55,
+        salvagePct: 55,
+        targetRtoReductionPct: 20
+      }
+    };
+
+    function formatINR(value) {
+      if (!isFinite(value)) return "₹0";
+      return "₹" + Math.round(value).toLocaleString("en-IN");
+    }
+
+    function formatPct(value) {
+      if (!isFinite(value)) return "0%";
+      return (value * 100).toFixed(1) + "%";
+    }
+
+    function setDefaultsForCategory(catKey) {
+      const d = defaults[catKey];
+
+      document.getElementById("default-orders").textContent = d.orders.toLocaleString("en-IN") + " (typical)";
+      document.getElementById("default-aov").textContent = "₹" + d.aov.toLocaleString("en-IN");
+      document.getElementById("default-cod").textContent = d.codPct + "%";
+      document.getElementById("default-codRto").textContent = d.codRtoPct + "%";
+      document.getElementById("default-prepaidRefund").textContent = d.prepaidRefundPct + "%";
+      document.getElementById("default-forward").textContent = "₹" + d.forwardShip;
+      document.getElementById("default-reverse").textContent = "₹" + d.reverseShip;
+      document.getElementById("default-gm").textContent = d.gmPct + "%";
+      document.getElementById("default-salvage").textContent = d.salvagePct + "%";
+      document.getElementById("default-targetRto").textContent = d.targetRtoReductionPct + "%";
+
+      // Pre-fill inputs if empty
+      const inputs = [
+        ["orders", d.orders],
+        ["aov", d.aov],
+        ["codPct", d.codPct],
+        ["codRtoPct", d.codRtoPct],
+        ["prepaidRefundPct", d.prepaidRefundPct],
+        ["forwardShip", d.forwardShip],
+        ["reverseShip", d.reverseShip],
+        ["gmPct", d.gmPct],
+        ["salvagePct", d.salvagePct],
+        ["targetRtoReductionPct", d.targetRtoReductionPct]
+      ];
+
+      inputs.forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el.value) el.value = val;
+      });
+    }
+
+    function getNumber(id, defaultVal = 0) {
+      const v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) ? defaultVal : v;
+    }
+
+    function calculate() {
+      const orders = getNumber("orders");
+      const aov = getNumber("aov");
+      const codPct = getNumber("codPct") / 100;
+      const codRtoPct = getNumber("codRtoPct") / 100;
+      const prepaidRefundPct = getNumber("prepaidRefundPct") / 100;
+      const forwardShip = getNumber("forwardShip");
+      const reverseShip = getNumber("reverseShip");
+      const gmPct = getNumber("gmPct") / 100;
+      const salvagePct = getNumber("salvagePct") / 100;
+      const targetRtoReductionPct = getNumber("targetRtoReductionPct") / 100;
+
+      // Basic safeguards
+      if (orders <= 0 || aov <= 0) {
+        alert("Please enter at least total orders per month and AOV.");
+        return;
+      }
+
+      const monthlyRevenue = orders * aov;
+      const codOrders = orders * codPct;
+      const prepaidOrders = orders - codOrders;
+
+      const codRtoOrders = codOrders * codRtoPct;
+      const prepaidRefundOrders = prepaidOrders * prepaidRefundPct;
+
+      const grossMarginPerOrder = aov * gmPct;
+      const gmLostPerReturned = grossMarginPerOrder * (1 - salvagePct);
+
+      const lossPerCodRto = forwardShip + reverseShip + gmLostPerReturned;
+      const lossPerPrepaidRefund = forwardShip + gmLostPerReturned; // you can add reverseShip if you want
+
+      const monthlyLossCodRto = codRtoOrders * lossPerCodRto;
+      const annualLossCodRto = monthlyLossCodRto * 12;
+
+      const monthlyLossPrepaid = prepaidRefundOrders * lossPerPrepaidRefund;
+      const annualLossPrepaid = monthlyLossPrepaid * 12;
+
+      const totalMonthlyLeak = monthlyLossCodRto + monthlyLossPrepaid;
+      const totalAnnualLeak = annualLossCodRto + annualLossPrepaid;
+
+      const monthlyLeakPct = monthlyRevenue > 0 ? totalMonthlyLeak / monthlyRevenue : 0;
+      const annualRevenue = monthlyRevenue * 12;
+      const annualLeakPct = annualRevenue > 0 ? totalAnnualLeak / annualRevenue : 0;
+
+      const monthlySavingIfRtoReduced = monthlyLossCodRto * targetRtoReductionPct;
+      const annualSavingIfRtoReduced = annualLossCodRto * targetRtoReductionPct;
+
+      // Update UI
+      document.getElementById("monthlyLeak").textContent = formatINR(totalMonthlyLeak);
+      document.getElementById("annualLeak").textContent = formatINR(totalAnnualLeak);
+      document.getElementById("monthlyLeakPct").textContent = formatPct(monthlyLeakPct) + " of monthly revenue";
+      document.getElementById("annualLeakPct").textContent = formatPct(annualLeakPct) + " of annual revenue";
+      document.getElementById("annualSaving").textContent = formatINR(annualSavingIfRtoReduced);
+      document.getElementById("targetLabel").textContent =
+        "Assuming " + (targetRtoReductionPct * 100 || 0).toFixed(1) + "% COD RTO reduction";
+
+      document.getElementById("codRtoLoss").textContent = formatINR(annualLossCodRto);
+      document.getElementById("prepaidLoss").textContent = formatINR(annualLossPrepaid);
+      document.getElementById("revLabel").textContent = formatINR(annualRevenue);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const catSelect = document.getElementById("categorySelect");
+      setDefaultsForCategory(catSelect.value);
+
+      catSelect.addEventListener("change", () => {
+        setDefaultsForCategory(catSelect.value);
+      });
+
+      document.getElementById("calcBtn").addEventListener("click", calculate);
+    });
+  </script>
+</body>
+</html>
