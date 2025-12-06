@@ -15,8 +15,50 @@
     .page {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 24px 16px 40px;
+      padding: 16px 16px 40px;
     }
+
+    /* Header with logo + CTA */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-img {
+      height: 32px;
+      width: auto;
+      border-radius: 6px;
+      background: #0f172a;
+      object-fit: contain;
+    }
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: radial-gradient(circle at top left, #22c55e, #0ea5e9);
+      color: #0b1120;
+      font-weight: 600;
+      font-size: 0.86rem;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .demo-btn:hover {
+      filter: brightness(1.05);
+    }
+
     h1 {
       font-size: 1.8rem;
       margin-bottom: 4px;
@@ -27,6 +69,7 @@
       color: #cbd5f5;
     }
     p { font-size: 0.88rem; color: #9ca3af; margin: 4px 0 10px; }
+
     .card {
       background: rgba(15, 23, 42, 0.98);
       border-radius: 18px;
@@ -76,7 +119,8 @@
       display: inline-block;
       min-width: 70px;
     }
-    input[type="number"] {
+    input[type="number"],
+    input[type="text"] {
       width: 100%;
       padding: 6px 8px;
       border-radius: 8px;
@@ -85,7 +129,8 @@
       color: #e5e7eb;
       font-size: 0.85rem;
     }
-    input[type="number"]:focus {
+    input[type="number"]:focus,
+    input[type="text"]:focus {
       outline: none;
       border-color: #7dd3fc;
       box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.5);
@@ -130,21 +175,33 @@
       margin-top: 4px;
     }
     .muted { color: #6b7280; font-size: 0.76rem; }
-    .pill-tip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: rgba(15, 118, 110, 0.25);
-      color: #a5f3fc;
+
+    /* Demo card */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 700px) {
+      .demo-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <h1>ValetPe – RTO & Refund Profit Leak Calculator</h1>
+    <!-- Header with logo + demo button (scroll to demo form) -->
+    <div class="header">
+      <div class="logo-wrap">
+        <!-- Replace src with your actual logo path or URL -->
+        <img src="https://drive.google.com/file/d/1tuZLCF9-86jzHPnJdxaNcYh2VTi8bIa0/view?usp=sharing" alt="ValetPe" class="logo-img">
+        <div class="logo-text">ValetPe</div>
+      </div>
+      <button class="demo-btn" onclick="scrollToDemo()">
+        Book RTO Teardown Demo
+      </button>
+    </div>
+
+    <h1>RTO & Refund Profit Leak Calculator</h1>
     <p>Pick your category, compare your inputs vs category averages, and see how much profit you’re leaking via COD RTO + prepaid refunds.</p>
 
     <!-- Inputs: Category + basic volume + behaviour -->
@@ -312,19 +369,43 @@
           <div class="metric-label">Annual revenue (reference)</div>
         </div>
       </div>
+    </div>
 
-      <p style="margin-top:18px;">
-        <span class="pill-tip">
-          💡 Tip
-          <span> Mail us at team@Valetpe.com to solve for your Revenue and Profits </span>
-        </span>
+    <!-- Demo form -->
+    <div class="card" id="demo-card" style="margin-top:20px;">
+      <h2>Book a ValetPe RTO Teardown Demo</h2>
+      <p class="muted">Share a few details and then pick a convenient slot for a 20–30 min walkthrough of your RTO & refund profit leak.</p>
+      <div class="demo-grid">
+        <div>
+          <label>Your name</label>
+          <input type="text" id="demoName" placeholder="e.g. Ankit Mittal" />
+        </div>
+        <div>
+          <label>Brand name</label>
+          <input type="text" id="demoBrand" placeholder="e.g. XYZ Fashions" />
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="demoCategory">
+            <option value="">Select category</option>
+            <option value="Fashion / Apparel / Footwear">Fashion / Apparel / Footwear</option>
+            <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+            <option value="Health & Wellness / Nutra">Health & Wellness / Nutra</option>
+            <option value="Small Electronics / Gadgets">Small Electronics / Gadgets</option>
+            <option value="Home & Furnishings / Decor">Home & Furnishings / Decor</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="goToMeeting()">Continue to select a slot</button>
+      <p class="muted" style="margin-top:8px;">
+        You’ll be redirected to our calendar page in a new tab to pick a time.
       </p>
     </div>
   </div>
 
   <script>
     // === CATEGORY DEFAULTS ===
-    // Replace these with your exact "Category Average" values from Sheet2.
+    // Replace these with your exact "Category Average" values from your sheet.
     // Percentages here are in NORMAL % units (e.g. 55 = 55%).
     const categoryDefaults = {
       fashion: {
@@ -336,7 +417,7 @@
         reverseShip: 100,
         gmPct: 50,
         salvagePct: 50,
-        targetRtoReductionPct: 10
+        targetRtoReductionPct: 15
       },
       beauty: {
         aov: 700,
@@ -347,7 +428,7 @@
         reverseShip: 75,
         gmPct: 70,
         salvagePct: 10,
-        targetRtoReductionPct: 10
+        targetRtoReductionPct: 15
       },
       health: {
         aov: 1000,
@@ -358,7 +439,7 @@
         reverseShip: 80,
         gmPct: 50,
         salvagePct: 40,
-        targetRtoReductionPct: 10
+        targetRtoReductionPct: 15
       },
       electronics: {
         aov: 2000,
@@ -369,7 +450,7 @@
         reverseShip: 100,
         gmPct: 30,
         salvagePct: 70,
-        targetRtoReductionPct: 10
+        targetRtoReductionPct: 15
       },
       home: {
         aov: 1500,
@@ -380,11 +461,12 @@
         reverseShip: 130,
         gmPct: 55,
         salvagePct: 55,
-        targetRtoReductionPct: 10
+        targetRtoReductionPct: 15
       }
     };
 
-    const DEFAULT_ORDERS = 2000; // you can change this to match your Excel default
+    const DEFAULT_ORDERS = 2000; // change if you want another default
+    const MEETING_LINK = "https://calendly.com/valetpe/demo"; // <-- REPLACE with your real link
 
     function formatINR(value) {
       if (!isFinite(value)) return "₹0";
@@ -409,7 +491,6 @@
       document.getElementById("avg-salvagePct").textContent = d.salvagePct + "%";
       document.getElementById("avg-targetRto").textContent = d.targetRtoReductionPct + "%";
 
-      // Pre-fill inputs if empty
       const setIfEmpty = (id, val) => {
         const el = document.getElementById(id);
         if (!el.value) el.value = val;
@@ -450,8 +531,6 @@
       const salvagePct = getNum("salvagePct") / 100;
       const targetRtoReductionPct = getNum("targetRtoReductionPct") / 100;
 
-      // --- Same logic as Excel ---
-
       const monthlyRevenue = orders * aov;
       const codOrders = orders * codPct;
       const prepaidOrders = orders - codOrders;
@@ -463,7 +542,7 @@
       const gmLostPerReturned = grossMarginPerOrder * (1 - salvagePct);
 
       const lossPerCodRto = forwardShip + reverseShip + gmLostPerReturned;
-      const lossPerPrepaidRefund = forwardShip + gmLostPerReturned; // add reverseShip if your Excel does that
+      const lossPerPrepaidRefund = forwardShip + gmLostPerReturned;
 
       const monthlyLossCodRto = codRtoOrders * lossPerCodRto;
       const annualLossCodRto = monthlyLossCodRto * 12;
@@ -479,8 +558,6 @@
       const annualLeakPct = annualRevenue ? totalAnnualLeak / annualRevenue : 0;
 
       const annualSavingIfRtoReduced = annualLossCodRto * targetRtoReductionPct;
-
-      // --- Update UI ---
 
       document.getElementById("monthlyLeak").textContent = formatINR(totalMonthlyLeak);
       document.getElementById("annualLeak").textContent = formatINR(totalAnnualLeak);
@@ -499,6 +576,28 @@
       document.getElementById("annualRevenue").textContent = formatINR(annualRevenue);
     }
 
+    function scrollToDemo() {
+      const el = document.getElementById("demo-card");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function goToMeeting() {
+      const name = (document.getElementById("demoName").value || "").trim();
+      const brand = (document.getElementById("demoBrand").value || "").trim();
+      const category = (document.getElementById("demoCategory").value || "").trim();
+
+      // Build query params so you see context in Calendly (if supported)
+      const params = new URLSearchParams();
+      if (name) params.append("name", name);
+      if (brand) params.append("brand", brand);
+      if (category) params.append("category", category);
+
+      const url = MEETING_LINK + (params.toString() ? "?" + params.toString() : "");
+      window.open(url, "_blank", "noopener");
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const catSelect = document.getElementById("categorySelect");
       setCategoryDefaults(catSelect.value);
@@ -508,6 +607,3 @@
   </script>
 </body>
 </html>
-
-
-
